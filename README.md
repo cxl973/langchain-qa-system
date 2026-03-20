@@ -63,6 +63,25 @@ langchain-qa-system/
                     否 → 直接生成答案
 ```
 
+## 🔌 支持的模型
+
+### OpenAI (默认)
+```bash
+LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-xxx
+OPENAI_MODEL=gpt-4o-mini
+```
+
+### MiniMax
+```bash
+LLM_PROVIDER=minimax
+MINIMAX_API_KEY=your-minimax-key
+MINIMAX_MODEL=abab6.5s-chat
+MINIMAX_API_BASE=https://api.minimax.chat/v1
+```
+
+> 获取 MiniMax API Key: https://platform.minimax.chat/
+
 ## 💻 编程使用
 
 ```python

@@ -7,6 +7,7 @@ from typing import TypedDict, List, Annotated
 
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
+from langchain_community.chat_models import ChatMiniMax
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -52,17 +53,32 @@ def retrieve_context(state: QAState) -> QAState:
     return {"context": context}
 
 
+def get_llm():
+    """Get the LLM based on configuration."""
+    provider = os.getenv("LLM_PROVIDER", "openai").lower()
+    
+    if provider == "minimax":
+        return ChatMiniMax(
+            model=os.getenv("MINIMAX_MODEL", "abab6.5s-chat"),
+            mini_max_api_key=os.getenv("MINIMAX_API_KEY"),
+            mini_max_api_base=os.getenv("MINIMAX_API_BASE", "https://api.minimax.chat/v1")
+        )
+    else:
+        # Default to OpenAI
+        return ChatOpenAI(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            api_key=os.getenv("OPENAI_API_KEY"),
+            base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        )
+
+
 def generate_answer(state: QAState) -> QAState:
     """Generate answer using LLM with context."""
     question = state["question"]
     context = state.get("context", "")
     needs_context = state.get("needs_context", False)
     
-    llm = ChatOpenAI(
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        api_key=os.getenv("OPENAI_API_KEY"),
-        base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-    )
+    llm = get_llm()
     
     # Build prompt with or without context
     if needs_context and context != "No previous context.":
